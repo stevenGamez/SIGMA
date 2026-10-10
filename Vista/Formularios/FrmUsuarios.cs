@@ -43,6 +43,7 @@ namespace Vista.Formularios
             try
             {
                 Combos.Llenar(cboRol, RolDatos.Listar());
+                Combos.Llenar(cboCliente, ClienteDatos.Listar());
             }
             catch (Exception ex)
             {
@@ -72,7 +73,7 @@ namespace Vista.Formularios
 
                 foreach (Usuario u in cargados)
                 {
-                    if (!Filtro.Coincide(filtro, u.NombreUsuario, u.Nombre, u.Rol)) continue;
+                    if (!Filtro.Coincide(filtro, u.NombreUsuario, u.Nombre, u.Rol, u.Cliente)) continue;
 
                     string estado = "Inactivo";
                     if (u.Activo) estado = "Activo";
@@ -121,11 +122,18 @@ namespace Vista.Formularios
             txtUsuario.Text = u.NombreUsuario;
             Combos.Seleccionar(cboRol, u.Rol);
             txtCorreo.Text = u.Correo;
+            if (u.IdCliente > 0) Combos.Seleccionar(cboCliente, u.Cliente);
             chkActivo.Checked = u.Activo;
 
             lblClave.Text = "CONTRASEÑA NUEVA";
             txtClave.Clear();
             txtClave.PlaceholderText = "dejar vacío para no cambiarla";
+        }
+
+        // la empresa solo se usa con el rol de cliente
+        private void cboRol_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            cboCliente.Enabled = Combos.Texto(cboRol) == Rol.ClienteCorporativo;
         }
 
         private void btnGuardar_Click(object sender, EventArgs e)
@@ -168,6 +176,19 @@ namespace Vista.Formularios
                 return;
             }
 
+            // el cliente corporativo tiene que llevar su empresa
+            int idCliente = 0;
+            if (rol.Nombre == Rol.ClienteCorporativo)
+            {
+                Cliente cliente = cboCliente.SelectedItem as Cliente;
+                if (cliente == null)
+                {
+                    Validaciones.Invalido(avisos, cboCliente, "ERR-VAL-001", "Un cliente corporativo necesita su empresa.\nSi la lista está vacía, primero registra el cliente.");
+                    return;
+                }
+                idCliente = cliente.IdCliente;
+            }
+
             // al crear es obligatoria, al editar solo si escribieron una nueva
             bool cambiaClave = clave.Length > 0;
             if (editId == 0) cambiaClave = true;
@@ -201,6 +222,7 @@ namespace Vista.Formularios
                 u.Nombre = nombre;
                 u.NombreUsuario = nombreUsuario;
                 u.IdRol = rol.IdRol;
+                u.IdCliente = idCliente;
                 u.Correo = correo;
                 u.Activo = chkActivo.Checked;
 
@@ -288,6 +310,8 @@ namespace Vista.Formularios
             txtUsuario.Clear();
             Combos.Seleccionar(cboRol, Rol.Ingeniero);
             txtCorreo.Clear();
+            if (cboCliente.Items.Count > 0) cboCliente.SelectedIndex = 0;
+            cboCliente.Enabled = Combos.Texto(cboRol) == Rol.ClienteCorporativo;
             chkActivo.Checked = true;
 
             lblClave.Text = "CONTRASEÑA *";

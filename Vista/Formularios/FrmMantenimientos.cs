@@ -8,7 +8,8 @@ namespace Vista.Formularios
 {
 
     // Visitas de mantenimiento.
-    // El administrador las programa y el ingeniero ve las suyas y llena la hoja.
+    // El administrador las programa, el ingeniero ve las suyas y llena la hoja,
+    // y el cliente solo consulta el historial de su empresa.
     public partial class FrmMantenimientos : Form
     {
         private const string TodosLosEstados = "Todos los estados";
@@ -39,6 +40,7 @@ namespace Vista.Formularios
 
             if (!Sesion.Puede(Permisos.HojasRegistrar)) btnHoja.Text = "VER DETALLE";
             if (Sesion.EsIngeniero) lblTitulo.Text = "Mis visitas asignadas";
+            if (Sesion.EsCliente) lblTitulo.Text = "Historial de mantenimiento de " + Sesion.Actual.Cliente;
 
             cargando = false;
             CargarDatos();
@@ -52,7 +54,7 @@ namespace Vista.Formularios
 
             try
             {
-                Combos.Llenar(cboEquipo, EquipoDatos.Listar());
+                Combos.Llenar(cboEquipo, EquipoDatos.Listar(0));
                 Combos.Llenar(cboIngeniero, UsuarioDatos.ListarIngenieros());
             }
             catch (Exception ex)
@@ -75,6 +77,9 @@ namespace Vista.Formularios
 
             // se oculta el tipo para que quepa la tabla
             if (puedeGestionar) dgvVisitas.Columns["Tipo"].Visible = false;
+
+            // al cliente se le muestra la ubicación en vez de su empresa
+            if (Sesion.EsCliente) dgvVisitas.Columns["Cliente"].HeaderText = "Ubicación";
         }
 
         private void CargarDatos()
@@ -85,16 +90,19 @@ namespace Vista.Formularios
 
             try
             {
-                // el ingeniero solo ve las suyas
-                cargados = MantenimientoDatos.Listar(Sesion.IngenieroVisible);
+                // el cliente ve las de su empresa y el ingeniero solo las suyas
+                cargados = MantenimientoDatos.Listar(Sesion.ClienteVisible, Sesion.IngenieroVisible);
 
                 foreach (Mantenimiento m in cargados)
                 {
                     if (estado != TodosLosEstados && m.Estado != estado) continue;
                     if (!Filtro.Coincide(filtro, m.Codigo, m.Equipo, m.Cliente, m.Ingeniero, m.Tipo, m.Ubicacion)) continue;
 
+                    string lugar = m.Cliente;
+                    if (Sesion.EsCliente) lugar = m.Ubicacion;
+
                     dgvVisitas.Rows.Add(m.IdMantenimiento, m.Codigo, m.FechaProgramada.ToString("dd/MM/yyyy"),
-                                        m.Tipo, m.Equipo, m.Cliente, m.Ingeniero, m.Estado);
+                                        m.Tipo, m.Equipo, lugar, m.Ingeniero, m.Estado);
                 }
 
                 dgvVisitas.ClearSelection();

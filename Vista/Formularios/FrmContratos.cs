@@ -8,7 +8,7 @@ using Vista.Utilidades;
 namespace Vista.Formularios
 {
 
-    // CRUD de contratos
+    // CRUD de contratos, el cliente solo ve los suyos
     public partial class FrmContratos : Form
     {
         private int editId = 0;
@@ -29,6 +29,8 @@ namespace Vista.Formularios
 
             if (puedeGestionar) CargarCombos();
             else Ventanas.SoloLectura(this, pnlTabla, pnlForm);
+
+            if (Sesion.EsCliente) lblTitulo.Text = "Contratos de " + Sesion.Actual.Cliente;
 
             CargarDatos("");
             LimpiarFormulario();
@@ -82,7 +84,8 @@ namespace Vista.Formularios
 
             try
             {
-                cargados = ContratoDatos.Listar();
+                // el cliente solo ve los contratos de su empresa
+                cargados = ContratoDatos.Listar(Sesion.ClienteVisible);
 
                 foreach (Contrato c in cargados)
                 {

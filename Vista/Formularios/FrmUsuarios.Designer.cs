@@ -33,6 +33,8 @@
             this.cboRol = new Guna.UI2.WinForms.Guna2ComboBox();
             this.lblCorreo = new System.Windows.Forms.Label();
             this.txtCorreo = new Guna.UI2.WinForms.Guna2TextBox();
+            this.lblCliente = new System.Windows.Forms.Label();
+            this.cboCliente = new Guna.UI2.WinForms.Guna2ComboBox();
             this.lblClave = new System.Windows.Forms.Label();
             this.txtClave = new Guna.UI2.WinForms.Guna2TextBox();
             this.chkActivo = new Guna.UI2.WinForms.Guna2CheckBox();
@@ -80,7 +82,7 @@
             this.txtBuscar.PlaceholderText = "Buscar usuario...";
             this.txtBuscar.Size = new System.Drawing.Size(260, 36);
             this.txtBuscar.TabIndex = 0;
-            this.pistas.SetToolTip(this.txtBuscar, "Busca por usuario, nombre o rol");
+            this.pistas.SetToolTip(this.txtBuscar, "Busca por usuario, nombre, rol o empresa");
             this.txtBuscar.TextChanged += new System.EventHandler(this.txtBuscar_TextChanged);
 
             this.dgvUsuarios.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
@@ -104,6 +106,8 @@
             this.pnlForm.Controls.Add(this.cboRol);
             this.pnlForm.Controls.Add(this.lblCorreo);
             this.pnlForm.Controls.Add(this.txtCorreo);
+            this.pnlForm.Controls.Add(this.lblCliente);
+            this.pnlForm.Controls.Add(this.cboCliente);
             this.pnlForm.Controls.Add(this.lblClave);
             this.pnlForm.Controls.Add(this.txtClave);
             this.pnlForm.Controls.Add(this.chkActivo);
@@ -163,6 +167,7 @@
             this.cboRol.Size = new System.Drawing.Size(178, 36);
             this.cboRol.TabIndex = 2;
             this.pistas.SetToolTip(this.cboRol, "El rol decide qué permisos tiene el usuario");
+            this.cboRol.SelectedIndexChanged += new System.EventHandler(this.cboRol_SelectedIndexChanged);
 
             this.lblCorreo.AutoSize = true;
             this.lblCorreo.Location = new System.Drawing.Point(20, 182);
@@ -177,25 +182,40 @@
             this.txtCorreo.Size = new System.Drawing.Size(308, 36);
             this.txtCorreo.TabIndex = 3;
 
+            this.lblCliente.AutoSize = true;
+            this.lblCliente.Location = new System.Drawing.Point(20, 244);
+            this.lblCliente.Name = "lblCliente";
+            this.lblCliente.Tag = "campo";
+            this.lblCliente.Text = "EMPRESA (SOLO CLIENTE CORPORATIVO)";
+
+            this.cboCliente.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cboCliente.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboCliente.ItemHeight = 30;
+            this.cboCliente.Location = new System.Drawing.Point(20, 262);
+            this.cboCliente.Name = "cboCliente";
+            this.cboCliente.Size = new System.Drawing.Size(308, 36);
+            this.cboCliente.TabIndex = 4;
+            this.pistas.SetToolTip(this.cboCliente, "El usuario solo verá los contratos, equipos y visitas de esta empresa");
+
             this.lblClave.AutoSize = true;
-            this.lblClave.Location = new System.Drawing.Point(20, 244);
+            this.lblClave.Location = new System.Drawing.Point(20, 306);
             this.lblClave.Name = "lblClave";
             this.lblClave.Tag = "campo";
             this.lblClave.Text = "CONTRASEÑA *";
 
-            this.txtClave.Location = new System.Drawing.Point(20, 262);
+            this.txtClave.Location = new System.Drawing.Point(20, 324);
             this.txtClave.MaxLength = 60;
             this.txtClave.Name = "txtClave";
             this.txtClave.PlaceholderText = "mínimo 8, con letras y números";
             this.txtClave.Size = new System.Drawing.Size(308, 36);
-            this.txtClave.TabIndex = 4;
+            this.txtClave.TabIndex = 5;
             this.txtClave.UseSystemPasswordChar = true;
             this.pistas.SetToolTip(this.txtClave, "Se guarda cifrada con BCrypt; nadie puede leerla");
 
             this.chkActivo.AutoSize = true;
             this.chkActivo.Checked = true;
             this.chkActivo.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkActivo.Location = new System.Drawing.Point(22, 314);
+            this.chkActivo.Location = new System.Drawing.Point(22, 376);
             this.chkActivo.Name = "chkActivo";
             this.chkActivo.Size = new System.Drawing.Size(240, 21);
             this.chkActivo.TabIndex = 6;
@@ -266,6 +286,8 @@
         private Guna.UI2.WinForms.Guna2ComboBox cboRol;
         private System.Windows.Forms.Label lblCorreo;
         private Guna.UI2.WinForms.Guna2TextBox txtCorreo;
+        private System.Windows.Forms.Label lblCliente;
+        private Guna.UI2.WinForms.Guna2ComboBox cboCliente;
         private System.Windows.Forms.Label lblClave;
         private Guna.UI2.WinForms.Guna2TextBox txtClave;
         private Guna.UI2.WinForms.Guna2CheckBox chkActivo;

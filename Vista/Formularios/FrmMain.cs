@@ -43,6 +43,7 @@ namespace Vista.Formularios
         {
             lblUsuario.Text = usuarioActual.Nombre;
             lblRol.Text = usuarioActual.Rol;
+            if (Sesion.EsCliente) lblRol.Text = "Cliente corporativo";
         }
 
         private bool Alguno(string permisoA, string permisoB)
@@ -65,8 +66,18 @@ namespace Vista.Formularios
             navMantenimientos.Visible = Alguno(Permisos.MantenimientosVer, Permisos.MantenimientosGestionar);
             if (Sesion.Puede(Permisos.HojasRegistrar)) navMantenimientos.Visible = true;
 
+            navContratos.Text = "Contratos";
+            navEquipos.Text = "Equipos";
             navMantenimientos.Text = "Mantenimientos";
+
             if (Sesion.EsIngeniero) navMantenimientos.Text = "Mis visitas";
+
+            if (Sesion.EsCliente)
+            {
+                navContratos.Text = "Mis contratos";
+                navEquipos.Text = "Mis equipos";
+                navMantenimientos.Text = "Historial de mantenimiento";
+            }
         }
 
         private void Expulsar(string motivo)

@@ -10,7 +10,7 @@ namespace Modelo.Modelo
     {
 
         private const string SqlBase =
-            @"SELECT IdUsuario, Nombre, NombreUsuario, Contrasena, IdRol, Rol,
+            @"SELECT IdUsuario, Nombre, NombreUsuario, Contrasena, IdRol, Rol, IdCliente, Cliente,
                      Correo, Activo, FechaCreacion, UltimoAcceso
               FROM VistaUsuarios";
 
@@ -150,9 +150,9 @@ namespace Modelo.Modelo
             try
             {
                 string sql = @"INSERT INTO Usuarios
-                                   (Nombre, NombreUsuario, Contrasena, IdRol, Correo, Activo, FechaCreacion)
+                                   (Nombre, NombreUsuario, Contrasena, IdRol, IdCliente, Correo, Activo, FechaCreacion)
                                VALUES
-                                   (@Nombre, @Usuario, @Clave, @IdRol, @Correo, @Activo, @Fecha);
+                                   (@Nombre, @Usuario, @Clave, @IdRol, @IdCliente, @Correo, @Activo, @Fecha);
                                SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                 using (SqlConnection con = Conexion.Abrir())
@@ -186,7 +186,7 @@ namespace Modelo.Modelo
 
                 string sql = @"UPDATE Usuarios
                                SET Nombre = @Nombre, NombreUsuario = @Usuario, IdRol = @IdRol,
-                                   Correo = @Correo, Activo = @Activo
+                                   IdCliente = @IdCliente, Correo = @Correo, Activo = @Activo
                                WHERE IdUsuario = @Id";
 
                 using (SqlConnection con = Conexion.Abrir())
@@ -205,11 +205,12 @@ namespace Modelo.Modelo
 
         private static void PonerParametros(SqlCommand cmd, Usuario u)
         {
-            cmd.Parameters.AddWithValue("@Nombre",  u.Nombre);
-            cmd.Parameters.AddWithValue("@Usuario", u.NombreUsuario);
-            cmd.Parameters.AddWithValue("@IdRol",   u.IdRol);
-            cmd.Parameters.AddWithValue("@Correo",  Nulos.Guardar(u.Correo));
-            cmd.Parameters.AddWithValue("@Activo",  u.Activo);
+            cmd.Parameters.AddWithValue("@Nombre",    u.Nombre);
+            cmd.Parameters.AddWithValue("@Usuario",   u.NombreUsuario);
+            cmd.Parameters.AddWithValue("@IdRol",     u.IdRol);
+            cmd.Parameters.AddWithValue("@IdCliente", Nulos.GuardarId(u.IdCliente));
+            cmd.Parameters.AddWithValue("@Correo",    Nulos.Guardar(u.Correo));
+            cmd.Parameters.AddWithValue("@Activo",    u.Activo);
         }
 
         public static void CambiarClave(int idUsuario, string claveCifrada)
@@ -301,6 +302,8 @@ namespace Modelo.Modelo
             u.Contrasena = fila["Contrasena"].ToString();
             u.IdRol = Convert.ToInt32(fila["IdRol"]);
             u.Rol = fila["Rol"].ToString();
+            u.IdCliente = Nulos.LeerEntero(fila["IdCliente"]);
+            u.Cliente = Nulos.Leer(fila["Cliente"]);
             u.Correo = Nulos.Leer(fila["Correo"]);
             u.Activo = Convert.ToBoolean(fila["Activo"]);
             u.FechaCreacion = Convert.ToDateTime(fila["FechaCreacion"]);

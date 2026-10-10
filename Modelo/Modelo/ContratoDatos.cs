@@ -13,12 +13,16 @@ namespace Modelo.Modelo
                      MontoMensual, Estado, Descripcion, Equipos
               FROM VistaContratos";
 
-        public static Contrato[] Listar()
+        // si idCliente es 0 trae todos los contratos
+        public static Contrato[] Listar(int idCliente)
         {
             try
             {
+                string sql = SqlBase + " WHERE (@IdCliente = 0 OR IdCliente = @IdCliente) ORDER BY IdContrato DESC";
+
                 DataTable tabla = new DataTable();
-                SqlDataAdapter adaptador = new SqlDataAdapter(SqlBase + " ORDER BY IdContrato DESC", Conexion.Cadena);
+                SqlDataAdapter adaptador = new SqlDataAdapter(sql, Conexion.Cadena);
+                adaptador.SelectCommand.Parameters.AddWithValue("@IdCliente", idCliente);
                 adaptador.Fill(tabla);
                 Contrato[] lista = new Contrato[tabla.Rows.Count];
 

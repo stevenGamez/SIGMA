@@ -7,7 +7,7 @@ using Vista.Utilidades;
 namespace Vista.Formularios
 {
 
-    // CRUD de equipos, el ingeniero solo los puede ver
+    // CRUD de equipos, el ingeniero y el cliente solo los pueden ver
     public partial class FrmEquipos : Form
     {
         private int editId = 0;
@@ -29,6 +29,8 @@ namespace Vista.Formularios
             if (puedeGestionar) CargarCombos();
             else Ventanas.SoloLectura(this, pnlTabla, pnlForm);
 
+            if (Sesion.EsCliente) lblTitulo.Text = "Equipos instalados en " + Sesion.Actual.Cliente;
+
             CargarDatos("");
             LimpiarFormulario();
         }
@@ -45,7 +47,7 @@ namespace Vista.Formularios
 
             try
             {
-                Combos.Llenar(cboContrato, ContratoDatos.Listar());
+                Combos.Llenar(cboContrato, ContratoDatos.Listar(0));
             }
             catch (Exception ex)
             {
@@ -73,6 +75,9 @@ namespace Vista.Formularios
                 dgvEquipos.Columns["Capacidad"].Visible = false;
                 dgvEquipos.Columns["Contrato"].Visible = false;
             }
+
+            // al cliente no se le repite el nombre de su empresa
+            if (Sesion.EsCliente) dgvEquipos.Columns["Cliente"].Visible = false;
         }
 
         private void CargarDatos(string filtro)
@@ -82,7 +87,7 @@ namespace Vista.Formularios
 
             try
             {
-                cargados = EquipoDatos.Listar();
+                cargados = EquipoDatos.Listar(Sesion.ClienteVisible);
 
                 foreach (Equipo eq in cargados)
                 {

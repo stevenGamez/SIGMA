@@ -4,6 +4,7 @@
     {
         public const string Administrador = "Administrador";
         public const string Ingeniero = "Ingeniero";
+        public const string ClienteCorporativo = "ClienteCorporativo";
 
         public const int IdAdministrador = 1;
 

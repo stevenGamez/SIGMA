@@ -15,16 +15,18 @@ namespace Modelo.Modelo
                      Diagnostico, TrabajoRealizado, Observaciones, CostoRepuestos
               FROM VistaMantenimientos";
 
-        // si idIngeniero es 0 trae todas las visitas
-        public static Mantenimiento[] Listar(int idIngeniero)
+        // con 0 en idCliente o en idIngeniero no se filtra por ese dato
+        public static Mantenimiento[] Listar(int idCliente, int idIngeniero)
         {
             try
             {
-                string sql = SqlBase + @" WHERE (@IdIngeniero = 0 OR IdIngeniero = @IdIngeniero)
+                string sql = SqlBase + @" WHERE (@IdCliente = 0 OR IdCliente = @IdCliente)
+                                            AND (@IdIngeniero = 0 OR IdIngeniero = @IdIngeniero)
                                           ORDER BY FechaProgramada DESC, IdMantenimiento DESC";
 
                 DataTable tabla = new DataTable();
                 SqlDataAdapter adaptador = new SqlDataAdapter(sql, Conexion.Cadena);
+                adaptador.SelectCommand.Parameters.AddWithValue("@IdCliente", idCliente);
                 adaptador.SelectCommand.Parameters.AddWithValue("@IdIngeniero", idIngeniero);
                 adaptador.Fill(tabla);
                 Mantenimiento[] lista = new Mantenimiento[tabla.Rows.Count];

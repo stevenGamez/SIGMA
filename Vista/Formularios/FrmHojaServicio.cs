@@ -7,7 +7,8 @@ using Vista.Utilidades;
 namespace Vista.Formularios
 {
 
-    // Hoja de servicio de la visita, la llena el ingeniero
+    // Hoja de servicio de la visita, la llena el ingeniero.
+    // El administrador y el cliente solo la pueden ver.
     public partial class FrmHojaServicio : Form
     {
         private int idMantenimiento;
@@ -52,6 +53,14 @@ namespace Vista.Formularios
             if (visita == null)
             {
                 Mensajes.Aviso("Esa visita ya no existe.");
+                Close();
+                return;
+            }
+
+            // el cliente solo puede abrir visitas de su empresa
+            if (Sesion.EsCliente && visita.IdCliente != Sesion.Actual.IdCliente)
+            {
+                Mensajes.Aviso("Esa visita no pertenece a tus instalaciones.");
                 Close();
                 return;
             }

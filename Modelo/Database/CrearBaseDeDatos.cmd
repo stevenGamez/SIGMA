@@ -99,6 +99,7 @@ echo.
 echo     Usuarios de prueba:
 echo         admin      /  Admin123
 echo         ingeniero  /  Ingeniero123
+echo         cliente    /  Cliente123
 
 :final
 echo.

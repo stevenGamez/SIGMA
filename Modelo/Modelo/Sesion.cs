@@ -29,6 +29,17 @@
 
         public static bool EsAdmin     { get { return Actual.Rol == Rol.Administrador; } }
         public static bool EsIngeniero { get { return Actual.Rol == Rol.Ingeniero; } }
+        public static bool EsCliente   { get { return Actual.Rol == Rol.ClienteCorporativo; } }
+
+        // el cliente solo ve lo de su empresa, el 0 es para ver todas
+        public static int ClienteVisible
+        {
+            get
+            {
+                if (EsCliente) return Actual.IdCliente;
+                return 0;
+            }
+        }
 
         // el ingeniero solo ve sus visitas, el 0 es para ver todas
         public static int IngenieroVisible

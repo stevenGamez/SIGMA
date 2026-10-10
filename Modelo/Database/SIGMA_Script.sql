@@ -29,10 +29,10 @@ USE SIGMA;
 GO
 
 -- =============================================
--- TABLAS DE ROLES, PERMISOS Y USUARIOS
+-- TABLAS DE ROLES Y PERMISOS
 -- =============================================
 
--- Roles del sistema (Administrador e Ingeniero)
+-- Roles del sistema (Administrador, Ingeniero y ClienteCorporativo)
 CREATE TABLE Roles
 (
     IdRol        INT            IDENTITY(1,1) PRIMARY KEY,
@@ -64,28 +64,12 @@ CREATE TABLE RolesPermisos
 );
 GO
 
--- Usuarios que entran al sistema
-CREATE TABLE Usuarios
-(
-    IdUsuario      INT            IDENTITY(1,1) PRIMARY KEY,
-    Nombre         NVARCHAR(100)  NOT NULL,
-    NombreUsuario  VARCHAR(30)    NOT NULL UNIQUE,        -- con este inicia sesión
-    Contrasena     VARCHAR(100)   NOT NULL,               -- se guarda encriptada con BCrypt
-    IdRol          INT            NOT NULL,
-    Correo         VARCHAR(100)   NULL,
-    Activo         BIT            NOT NULL DEFAULT 1,     -- 1 = activo, 0 = inactivo
-    FechaCreacion  DATETIME       NOT NULL DEFAULT GETDATE(),
-    UltimoAcceso   DATETIME       NULL,
-    CONSTRAINT FK_Usuarios_Roles
-        FOREIGN KEY (IdRol) REFERENCES Roles(IdRol)
-);
-GO
-
 -- =============================================
 -- TABLAS DEL SISTEMA
 -- =============================================
 
 -- Clientes: las empresas que contratan el mantenimiento
+-- (va antes que Usuarios porque el usuario cliente pertenece a una empresa)
 CREATE TABLE Clientes
 (
     IdCliente  INT            IDENTITY(1,1) PRIMARY KEY,
@@ -95,6 +79,26 @@ CREATE TABLE Clientes
     Telefono   VARCHAR(9)     NOT NULL,               -- 0000-0000
     Correo     VARCHAR(100)   NULL,
     Direccion  NVARCHAR(200)  NOT NULL
+);
+GO
+
+-- Usuarios que entran al sistema
+CREATE TABLE Usuarios
+(
+    IdUsuario      INT            IDENTITY(1,1) PRIMARY KEY,
+    Nombre         NVARCHAR(100)  NOT NULL,
+    NombreUsuario  VARCHAR(30)    NOT NULL UNIQUE,        -- con este inicia sesión
+    Contrasena     VARCHAR(100)   NOT NULL,               -- se guarda encriptada con BCrypt
+    IdRol          INT            NOT NULL,
+    IdCliente      INT            NULL,                   -- solo se llena si el rol es ClienteCorporativo
+    Correo         VARCHAR(100)   NULL,
+    Activo         BIT            NOT NULL DEFAULT 1,     -- 1 = activo, 0 = inactivo
+    FechaCreacion  DATETIME       NOT NULL DEFAULT GETDATE(),
+    UltimoAcceso   DATETIME       NULL,
+    CONSTRAINT FK_Usuarios_Roles
+        FOREIGN KEY (IdRol) REFERENCES Roles(IdRol),
+    CONSTRAINT FK_Usuarios_Clientes
+        FOREIGN KEY (IdCliente) REFERENCES Clientes(IdCliente)
 );
 GO
 
@@ -217,13 +221,15 @@ GO
 -- VISTAS
 -- =============================================
 
--- usuarios con el nombre de su rol
+-- usuarios con el nombre de su rol y, si es cliente, el de su empresa
 CREATE VIEW VistaUsuarios AS
 SELECT  Usuarios.IdUsuario, Usuarios.Nombre, Usuarios.NombreUsuario, Usuarios.Contrasena,
         Usuarios.IdRol, Roles.Nombre AS Rol,
+        Usuarios.IdCliente, Clientes.Nombre AS Cliente,
         Usuarios.Correo, Usuarios.Activo, Usuarios.FechaCreacion, Usuarios.UltimoAcceso
 FROM        Usuarios
-INNER JOIN  Roles ON Roles.IdRol = Usuarios.IdRol;
+INNER JOIN  Roles    ON Roles.IdRol        = Usuarios.IdRol
+LEFT JOIN   Clientes ON Clientes.IdCliente = Usuarios.IdCliente;
 GO
 
 -- permisos de cada rol
@@ -298,10 +304,11 @@ GO
 -- DATOS INICIALES
 -- =============================================
 
--- Roles (el Administrador tiene que quedar con IdRol = 1)
+-- Los tres roles que pide el problema (el Administrador tiene que quedar con IdRol = 1)
 INSERT INTO Roles (Nombre, Descripcion) VALUES
-    ('Administrador', N'Gestión de contratos, repuestos, usuarios y asignación de personal'),
-    ('Ingeniero',     N'Registra las hojas de servicio y los repuestos consumidos en sus visitas');
+    ('Administrador',      N'Gestión de contratos, repuestos, usuarios y asignación de personal'),
+    ('Ingeniero',          N'Registra las hojas de servicio y los repuestos consumidos en sus visitas'),
+    ('ClienteCorporativo', N'Consulta el historial de mantenimiento de sus instalaciones');
 GO
 
 -- Permisos
@@ -332,6 +339,13 @@ SELECT Roles.IdRol, Permisos.IdPermiso
 FROM   Roles, Permisos
 WHERE  Roles.Nombre = 'Ingeniero'
   AND  Permisos.Clave IN ('EQUIPOS_VER', 'REPUESTOS_VER', 'MANTENIMIENTOS_VER', 'HOJAS_REGISTRAR');
+
+-- permisos del ClienteCorporativo (solo puede consultar)
+INSERT INTO RolesPermisos (IdRol, IdPermiso)
+SELECT Roles.IdRol, Permisos.IdPermiso
+FROM   Roles, Permisos
+WHERE  Roles.Nombre = 'ClienteCorporativo'
+  AND  Permisos.Clave IN ('CONTRATOS_VER', 'EQUIPOS_VER', 'MANTENIMIENTOS_VER');
 GO
 
 -- =============================================
@@ -352,13 +366,19 @@ GO
 --     admin       ->  Admin123        (Administrador)
 --     ingeniero   ->  Ingeniero123    (Ingeniero)
 --     shernandez  ->  Ingeniero123    (Ingeniero)
-INSERT INTO Usuarios (Nombre, NombreUsuario, Contrasena, IdRol, Correo, Activo) VALUES
+--     cliente     ->  Cliente123      (ClienteCorporativo de Corporación Los Próceres)
+--     mescobar    ->  Cliente123      (ClienteCorporativo de Hotel Vista Real)
+INSERT INTO Usuarios (Nombre, NombreUsuario, Contrasena, IdRol, IdCliente, Correo, Activo) VALUES
     (N'Administrador General', 'admin',
-     '$2a$11$.3VvSF3qdTbsFuVMygkWAu0LX2PL//hHSdb5me603F7.P8.y2TNG6', 1, 'admin@sigma.com.sv', 1),
+     '$2a$11$.3VvSF3qdTbsFuVMygkWAu0LX2PL//hHSdb5me603F7.P8.y2TNG6', 1, NULL, 'admin@sigma.com.sv', 1),
     (N'Roberto Martínez',      'ingeniero',
-     '$2a$11$48KVZ2tULiNccTllyzEgR.i/m.VFqCj3DPRr5mwG.tr/7gNuEmhKS', 2, 'rmartinez@sigma.com.sv', 1),
+     '$2a$11$48KVZ2tULiNccTllyzEgR.i/m.VFqCj3DPRr5mwG.tr/7gNuEmhKS', 2, NULL, 'rmartinez@sigma.com.sv', 1),
     (N'Sofía Hernández',       'shernandez',
-     '$2a$11$48KVZ2tULiNccTllyzEgR.i/m.VFqCj3DPRr5mwG.tr/7gNuEmhKS', 2, 'shernandez@sigma.com.sv', 1);
+     '$2a$11$48KVZ2tULiNccTllyzEgR.i/m.VFqCj3DPRr5mwG.tr/7gNuEmhKS', 2, NULL, 'shernandez@sigma.com.sv', 1),
+    (N'Andrea Menjívar',       'cliente',
+     '$2a$11$Vy/GdGsWony90tOapXAccuuGc.E65rmTca1qgnLWOj0R0OWGUU66i', 3, 1, 'mantenimiento@losproceres.com.sv', 1),
+    (N'Mauricio Escobar',      'mescobar',
+     '$2a$11$Vy/GdGsWony90tOapXAccuuGc.E65rmTca1qgnLWOj0R0OWGUU66i', 3, 2, 'operaciones@vistareal.com.sv', 1);
 GO
 
 -- Contratos

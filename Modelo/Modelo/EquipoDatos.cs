@@ -13,12 +13,16 @@ namespace Modelo.Modelo
                      CapacidadBTU, Ubicacion, FechaInstalacion, Estado
               FROM VistaEquipos";
 
-        public static Equipo[] Listar()
+        // si idCliente es 0 trae todos los equipos
+        public static Equipo[] Listar(int idCliente)
         {
             try
             {
+                string sql = SqlBase + " WHERE (@IdCliente = 0 OR IdCliente = @IdCliente) ORDER BY Cliente, NumeroSerie";
+
                 DataTable tabla = new DataTable();
-                SqlDataAdapter adaptador = new SqlDataAdapter(SqlBase + " ORDER BY Cliente, NumeroSerie", Conexion.Cadena);
+                SqlDataAdapter adaptador = new SqlDataAdapter(sql, Conexion.Cadena);
+                adaptador.SelectCommand.Parameters.AddWithValue("@IdCliente", idCliente);
                 adaptador.Fill(tabla);
                 Equipo[] lista = new Equipo[tabla.Rows.Count];
 

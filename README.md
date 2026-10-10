@@ -14,7 +14,7 @@ los repuestos y los ingenieros asignados, reemplazando las bitácoras físicas.
 |---|---|
 | Arquitectura Modelo-Vista | Proyecto `Modelo` (datos) y proyecto `Vista` (formularios) |
 | Login con BCrypt.Net | `Vista/Formularios/FrmLogin.cs` y `Modelo/Modelo/Clave.cs` |
-| Roles: Administrador e Ingeniero | Tablas `Roles`, `Permisos`, `RolesPermisos` |
+| Roles: Administrador, Ingeniero, ClienteCorporativo | Tablas `Roles`, `Permisos`, `RolesPermisos` |
 | Gestión de usuarios, roles y permisos | `FrmUsuarios` y `FrmRoles` |
 | CRUD de Equipos, Mantenimientos, Repuestos y Contratos | `FrmEquipos`, `FrmMantenimientos`, `FrmRepuestos`, `FrmContratos` (además `FrmClientes`) |
 | Hoja de servicio y repuestos consumidos | `FrmHojaServicio` |
@@ -25,14 +25,11 @@ los repuestos y los ingenieros asignados, reemplazando las bitácoras físicas.
 ## Permisos por rol
 
 - **Administrador:** gestión de contratos, equipos, repuestos, clientes, usuarios, roles y
-  permisos; programa las visitas y asigna al ingeniero; consulta el historial de mantenimiento
-  y la bitácora.
+  permisos; programa las visitas y asigna al ingeniero; consulta la bitácora.
 - **Ingeniero:** ve sus visitas asignadas y registra la hoja de servicio con los repuestos
   consumidos (se descuentan del inventario). Consulta equipos y repuestos.
-
-Los clientes no tienen usuario: son las empresas dueñas de los contratos y los equipos, y nunca
-interactúan directamente con el sistema. El administrador registra sus datos y consulta su
-historial de mantenimiento.
+- **ClienteCorporativo:** consulta el historial de mantenimiento, los contratos y los equipos de
+  sus propias instalaciones. No modifica nada.
 
 ## Cómo ejecutarlo
 
@@ -51,7 +48,9 @@ Requisitos: Windows 10/11, Visual Studio 2022 (.NET Framework 4.8) y SQL Server 
 |---|---|---|
 | `admin` | `Admin123` | Administrador |
 | `ingeniero` | `Ingeniero123` | Ingeniero |
+| `cliente` | `Cliente123` | ClienteCorporativo (Corporación Los Próceres) |
 | `shernandez` | `Ingeniero123` | Ingeniero |
+| `mescobar` | `Cliente123` | ClienteCorporativo (Hotel Vista Real) |
 
 Las contraseñas están guardadas como hash de BCrypt; el script nunca las guarda en texto plano.
 

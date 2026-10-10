@@ -10,6 +10,8 @@ namespace Modelo.Modelo
         public string Contrasena { get; set; }
         public int IdRol { get; set; }
         public string Rol { get; set; }
+        public int IdCliente { get; set; }
+        public string Cliente { get; set; }
         public string Correo { get; set; }
         public bool Activo { get; set; }
         public DateTime FechaCreacion { get; set; }

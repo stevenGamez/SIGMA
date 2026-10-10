@@ -22,6 +22,7 @@ namespace Vista.Formularios
             lblSaludo.Text = "Hola, " + Sesion.Actual.Nombre.Trim().Split(' ')[0];
             lblResumen.Text = "Este es el resumen general del sistema.";
             if (Sesion.EsIngeniero) lblResumen.Text = "Estas son las visitas que tienes asignadas.";
+            if (Sesion.EsCliente) lblResumen.Text = "Este es el estado de las instalaciones de " + Sesion.Actual.Cliente + ".";
 
             ConfigurarGrid();
             CargarDatos();
@@ -47,9 +48,10 @@ namespace Vista.Formularios
             {
                 MostrarPrimeraTarjeta();
 
-                lblValorDos.Text = EquipoDatos.Listar().Length.ToString();
+                lblValorDos.Text = EquipoDatos.Listar(Sesion.ClienteVisible).Length.ToString();
+                if (Sesion.EsCliente) lblNombreDos.Text = "Equipos instalados";
 
-                Mantenimiento[] visitas = MantenimientoDatos.Listar(Sesion.IngenieroVisible);
+                Mantenimiento[] visitas = MantenimientoDatos.Listar(Sesion.ClienteVisible, Sesion.IngenieroVisible);
                 int pendientes = 0;
                 int completadas = 0;
 
@@ -85,7 +87,7 @@ namespace Vista.Formularios
             if (veContratos)
             {
                 int vigentes = 0;
-                foreach (Contrato c in ContratoDatos.Listar())
+                foreach (Contrato c in ContratoDatos.Listar(Sesion.ClienteVisible))
                     if (c.Estado == "Vigente") vigentes++;
 
                 lblValorUno.Text = vigentes.ToString();
