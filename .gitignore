@@ -6,3 +6,6 @@ packages/
 *.suo
 *.lnk
 Indicaciones/
+Documentacion/Capturas/
+Documentacion/Diagramas/
+README.md
